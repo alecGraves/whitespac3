@@ -8,10 +8,16 @@ output.truncate()
 
 s = w.Translator()
 start = s.label()
-s.push(1)
+x= s.store(None, 100)
+y= s.store(None, 100)
+s.compare(x, '<=', y)
+
 e=s.ifstate()
-s.printstr("If Activated")
+s.printstr("True")
+s.jump(s.labelidx)
 s.endif(e)
+s.printstr("False")
+s.label()
 s.exit()
 
 output.write(s.string)

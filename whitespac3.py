@@ -360,7 +360,7 @@ class WhiteSpace(object):
         Starts an if statement.
         wrapped code executes if top of stack is not 0
         (eats top of stack)
-        followed by endif
+        RETURNS arg for endif
         """
         end_label = self.labelidx
         self.labelidx += 1
@@ -391,6 +391,7 @@ class WhiteSpace(object):
             self.jump(self.labelidx-2)
         elif comparison == '<=':
             self.sub()
+            self.dupl()
             self.jumpneg(self.labelidx-3)
             self.jumpzer(self.labelidx-3)
             self.jump(self.labelidx-2)
@@ -402,16 +403,17 @@ class WhiteSpace(object):
         elif comparison == '>=':
             self.swap()
             self.sub()
+            self.dupl()
             self.jumpneg(self.labelidx-3)
             self.jumpzer(self.labelidx-3)
             self.jump(self.labelidx-2)
 
         self.label(self.labelidx-3)
-        self.push(0)
+        self.push(1)
         self.jump(self.labelidx-1)
 
         self.label(self.labelidx-2)
-        self.push(1)
+        self.push(0)
 
         self.label(self.labelidx-1)
 
