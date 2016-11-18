@@ -239,13 +239,17 @@ def exec_instruction(name, num, label, label_length, ip, memory, stack, call_sta
 		try:
 			new_ip = labels[label]
 		except KeyError:
-			raise InterpreterException(ip, "Unknown label: " + label_to_str(label))
+			raise InterpreterException(ip, "Unknown label: " + 
+						"{0}".format(label).replace("\t", "[Tab]").replace("\n", "[LF]").replace(" ", "[space]") +
+						"\nOR calling without correct label")
 		call_stack.append(ip + label_length)
 	elif name == 'JUMP':
 		try:
 			new_ip = labels[label]
 		except KeyError:
-			raise InterpreterException(ip, "Unknown label: " + label_to_str(label))
+			raise InterpreterException(ip, "Unknown label: " + 
+						"{0}".format(label).replace("\t", "[Tab]").replace("\n", "[LF]").replace(" ", "[space]") +
+						"\nOR jumping without correct label")
 	elif name == 'JUMP-ZERO':
 		if len(stack) < 1:
 			raise InterpreterException(ip, "JUMP-ZERO with empty stack")
@@ -305,7 +309,7 @@ def print_verbose(string):
 	if G_verbose:
 		out_string("[INFO] " + string + "\n")
 
-# Looks for labels and adds maps them with their locations
+# Looks for labels and maps them with their locations
 def find_and_execute_labels(labels, memory, instructions, stack, call_stack, program_length):
 	ip = 0
 	while ip < program_length:
@@ -369,7 +373,7 @@ for c in text:
 		memory[ip] = v
 		ip += 1
 	else:
-		print_verbose("Ignored colored characted '%c' at ip=%d" % ((c, ip)))
+		print_verbose("Ignored colored character {0:s} at ip={1}".format(c, ip))
 #
 program_length = ip
 print_verbose("Program loaded, %d positions in memory" % program_length)

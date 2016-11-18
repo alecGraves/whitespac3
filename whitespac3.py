@@ -5,8 +5,8 @@ class WhiteSpace(object):
     def __init__(self, explain=True):
         self.string = ""
         self.explain = explain
-        self.locidx = 0
-        self.heapidx = 1000
+        self.labelidx = 0
+        self.heapidx = 0
     def __str__(self):
         '''how to print the object the whitespace code'''
         return self.string
@@ -197,14 +197,18 @@ class WhiteSpace(object):
         if self.explain:
             self.write("IMP:Flow_Control")
         self.write("\n")
-    def label(self):
+    def label(self, label=None):
         '''Mark a location in the program, returns the value'''
         self.flow()
         if self.explain:
             self.write("add_label")
-        self.write("  " + self.number(self.locidx))
-        self.locidx += 1
-        return self.locidx - 1
+        if label is None:
+            label = self.labelidx
+            self.write("  " + self.number(label))
+            self.labelidx += 1
+        else:
+            self.write("  " + self.number(label))
+        return label
     def subr(self, label):
         '''Call a subroutine in the program'''
         self.flow()
@@ -306,7 +310,7 @@ class WhiteSpace(object):
         self.push(linefeed)
         self.sub()
 
-        self.jumpzer(self.locidx)
+        self.jumpzer(self.labelidx)
         self.store(condition_addr, 0)
         self.label()
 
@@ -350,14 +354,66 @@ class WhiteSpace(object):
         self.dupl()
         self.store(iterator)
         self.jumpneg(label)
-#comparisons:
-    def equals(self, var1_addr, var2_addr, outputaddr=None):
-        '''subtracts two things, results 0 if they are the same'''
-        self.retrieve(var1_addr)
-        self.retrieve(var2_addr)
-        self.sub()
-        if outputaddr is not None:
-            self.store(outputaddr)
+# Logic
+    def ifstate(self):
+        """
+        Starts an if statement.
+        wrapped code executes if top of stack is not 0
+        (eats top of stack)
+        followed by endif
+        """
+        end_label = self.labelidx
+        self.labelidx += 1
+        self.jumpzer(end_label)
+        return end_label
+    def endif(self, end_label):
+        '''easily end if statement'''
+        self.label(end_label)
+
+    def compare(self, var1_address, comparison, var2_address):
+        """
+        first arg is on left.
+        defaults to vars are equal
+        '>' for greater, '<' for lessthan
+        pushes 0 to top of stack if false,
+        pushes 1 if true
+        """
+        self.labelidx += 3
+        self.retrieve(var1_address)
+        self.retrieve(var2_address)
+        if comparison == '=' or comparison == '==':
+            self.sub()
+            self.jumpzer(self.labelidx-3)
+            self.jump(self.labelidx-2)
+        elif comparison == '<':
+            self.sub()
+            self.jumpneg(self.labelidx-3)
+            self.jump(self.labelidx-2)
+        elif comparison == '<=':
+            self.sub()
+            self.jumpneg(self.labelidx-3)
+            self.jumpzer(self.labelidx-3)
+            self.jump(self.labelidx-2)
+        elif comparison == '>':
+            self.swap()
+            self.sub()
+            self.jumpneg(self.labelidx-3)
+            self.jump(self.labelidx-2)
+        elif comparison == '>=':
+            self.swap()
+            self.sub()
+            self.jumpneg(self.labelidx-3)
+            self.jumpzer(self.labelidx-3)
+            self.jump(self.labelidx-2)
+
+        self.label(self.labelidx-3)
+        self.push(0)
+        self.jump(self.labelidx-1)
+
+        self.label(self.labelidx-2)
+        self.push(1)
+
+        self.label(self.labelidx-1)
 
 class Translator(WhiteSpace):
     '''
