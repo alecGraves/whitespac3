@@ -1,25 +1,29 @@
 '''This file is to test the whitespace and translator objects'''
+import os
 import whitespac3 as w
 #char to int use ord('c')
 #int to char use 
-output = open("test.txt", 'w')
+output = open("output.txt", 'w')
 output.truncate()
 
 s = w.Translator()
 
-
-
-s.label(0)
-s.push(ord("\n"))
+s.printstr("Hello, World!\n")
+loc = s.alloc(1)
+loc2 = s.alloc(1)
+s.push(loc)
+s.push(loc2)
+s.charin()
+s.charin()
+s.retrieve(loc)
 s.printchar()
-s.push(100)
-s.push(10)
-s.store()
-s.push(3)
-s.printnum()
-
+s.retrieve(loc2)
+s.printchar()
 s.exit()
 
 output.write(s.string)
 
 output.close()
+
+
+os.system("python whitespace.py output.txt")

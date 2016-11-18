@@ -5,6 +5,8 @@ class WhiteSpace(object):
     def __init__(self, explain=True):
         self.string = ""
         self.explain = explain
+        self.locidx = 0
+        self.heapidx = 1000
     def __str__(self):
         '''how to print the object the whitespace code'''
         return self.string
@@ -61,7 +63,7 @@ class WhiteSpace(object):
         if self.explain:
             self.write("swap_top_two")
         self.write("\n\t")
-    def dis(self):
+    def delete(self):
         '''discard the top item int the swap'''
         self.stack_manip()
         if self.explain:
@@ -86,7 +88,10 @@ class WhiteSpace(object):
             self.write("add")
         self.write("  ")
     def sub(self):
-        '''sub top of stack'''
+        '''
+        subtract top of stack
+        The first item pushed is considered to be left of the operator.
+        '''
         self.arith()
         if self.explain:
             self.write("sub")
@@ -98,13 +103,19 @@ class WhiteSpace(object):
             self.write("mult")
         self.write(" \n")
     def div(self):
-        '''intiger division on top of stack'''
+        '''
+        intiger division on top of stack
+        The first item pushed is considered to be left of the operator.
+        '''
         self.arith()
         if self.explain:
             self.write("div")
         self.write("\t ")
     def mod(self):
-        '''modulo on top of stack'''
+        '''
+        modulo on top of stack
+        The first item pushed is considered to be left of the operator.
+        '''
         self.arith()
         if self.explain:
             self.write("mod")
@@ -124,23 +135,53 @@ class WhiteSpace(object):
         if self.explain:
             self.write("heap_access")
         self.write("\t\t")
-    def store(self):
+    def store(self, addr=None, val=None):
         '''
-        push an address then a val and run this command to store it
+        Push an address then a val and run this command to store it,
+            or use the arguements.
+        Returns address if used
+        Note: if you use the arguments (None, Val),
+            val will be stored at the heapidx (starts at 1k)
+        More intelligent memory management may be added in the future.
         '''
+        if addr is not None and val is not None:
+            self.push(addr)
+            self.push(val)
+        elif addr is None and val is not None:
+            addr = self.heapidx
+            self.push(addr)
+            self.push(val)
+            self.heapidx += 1
+        elif addr is not None and val is None:
+            self.push(addr)
+            self.swap()
+        else:
+            addr = self.heapidx
+            self.push(addr)
+            self.swap()
+            self.heapidx += 1
         self.heap()
         if self.explain:
             self.write("store")
-        self.write("\t\t")
-    def retrieve(self):
+        self.write(" ")
+        if addr is not None:
+            return addr
+    def retrieve(self, addr=None):
         '''
         push an address then run this command,
         and the val in the address will be pushed to the stack.
         '''
+        if addr != None:
+            self.push(addr)
         self.heap()
         if self.explain:
-            self.write("store")
-        self.write("\t\t")
+            self.write("retrieve")
+        self.write("\t")
+    def alloc(self, length):
+        '''Allocate a length of memory from the heap'''
+        self.heapidx += length
+        location = self.heapidx - length
+        return location
 
 # Flow Control
     def flow(self):
@@ -156,12 +197,14 @@ class WhiteSpace(object):
         if self.explain:
             self.write("IMP:Flow_Control")
         self.write("\n")
-    def label(self, label):
-        '''Mark a location in the program'''
+    def label(self):
+        '''Mark a location in the program, returns the value'''
         self.flow()
         if self.explain:
             self.write("add_label")
-        self.write("  " + self.number(label))
+        self.write("  " + self.number(self.locidx))
+        self.locidx += 1
+        return self.locidx - 1
     def subr(self, label):
         '''Call a subroutine in the program'''
         self.flow()
@@ -212,12 +255,18 @@ class WhiteSpace(object):
         if self.explain:
             self.write("IMP:I/O")
         self.write("\t\n")
-    def printchar(self):
+    def printchar(self, char=None):
         '''output and delete character at top of stack'''
+        if char is not None:
+            self.push(ord(char))
         self.iocom()
         if self.explain:
             self.write("output_top_char")
         self.write("  ")
+    def printstr(self, string):
+        '''Print a string'''
+        for i in enumerate(string):
+            self.printchar(i[1])
     def printnum(self):
         '''output and delete number at top of stack'''
         self.iocom()
@@ -230,12 +279,85 @@ class WhiteSpace(object):
         if self.explain:
             self.write("read_in_char")
         self.write("\t ")
+    def stringin(self):
+        '''Read in a string'''
+        strlen_addr = self.store(None, 0)
+        string_addr = self.alloc(100)
+        linefeed = ord("\n")
+        condition_addr = self.store(None, 0)
+
+        dostart, condition_addr = self.doloop(condition_addr)
+        self.store(condition_addr, 1)
+        self.push(string_addr)
+        self.retrieve(strlen_addr)
+        self.add()
+        self.charin()
+        self.retrieve(strlen_addr)
+        self.push(1)
+        self.add()
+        self.store(strlen_addr)
+
+        self.push(string_addr)
+        self.retrieve(strlen_addr)
+        self.add()
+        self.retrieve()
+        self.dupl()
+        self.printnum()
+        self.push(linefeed)
+        self.sub()
+
+        self.jumpzer(self.locidx)
+        self.store(condition_addr, 0)
+        self.label()
+
+        self.enddoloop(dostart, condition_addr)
+
+        return strlen_addr, string_addr
     def numin(self):
         '''read in a number'''
         self.iocom()
         if self.explain:
             self.write("read_in_num")
         self.write("\t\t")
+
+#Loops
+    def doloop(self, conditionloc):
+        '''
+        start a do loop.
+        Continues until value in conditionloc is nonzero.
+        '''
+        label = self.label()
+        return label, conditionloc
+    def enddoloop(self, label, conditionloc):
+        '''end a do loop'''
+        self.retrieve(conditionloc)
+        self.jumpzer(label)
+
+    def loop(self, repetitions):
+        '''
+        Starts a generic loop, returns args for endloop()
+        Args: repetitions
+        Returns: loop_label, iterator_location
+        '''
+        iterator = self.store(None, -1*repetitions)
+        label = self.label()
+        return label, iterator
+    def endloop(self, label, iterator):
+        '''Ends a generic loop loop'''
+        self.retrieve(iterator)
+        self.push(1)
+        self.add()
+        self.dupl()
+        self.store(iterator)
+        self.jumpneg(label)
+#comparisons:
+    def equals(self, var1_addr, var2_addr, outputaddr=None):
+        '''subtracts two things, results 0 if they are the same'''
+        self.retrieve(var1_addr)
+        self.retrieve(var2_addr)
+        self.sub()
+        if outputaddr is not None:
+            self.store(outputaddr)
 
 class Translator(WhiteSpace):
     '''

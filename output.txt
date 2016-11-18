@@ -1,0 +1,39 @@
+IMP:stack_manip push num_72 	  	   
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_101 		  	 	
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_108 		 		  
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_108 		 		  
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_111 		 				
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_44 	 		  
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_32 	     
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_87 	 	 			
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_111 		 				
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_114 			  	 
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_108 		 		  
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_100 		  	  
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_33 	    	
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_10 	 	 
+IMP:I/O	
+output_top_char  IMP:stack_manip push num_1000 					 	   
+IMP:stack_manip push num_1001 					 	  	
+IMP:I/O	
+read_in_char	 IMP:I/O	
+read_in_char	 IMP:stack_manip push num_1000 					 	   
+heap_access		retrieve	IMP:I/O	
+output_top_char  IMP:stack_manip push num_1001 					 	  	
+heap_access		retrieve	IMP:I/O	
+output_top_char  IMP:Flow_Control
+exit_pgrm
+
