@@ -340,7 +340,7 @@ class WhiteSpace(object):
     def loop(self, repetitions):
         '''
         Starts a generic loop, returns args for endloop()
-        Args: repetitions
+        Args: number of repetitions
         Returns: loop_label, iterator_location
         '''
         iterator = self.store(None, -1*repetitions)
