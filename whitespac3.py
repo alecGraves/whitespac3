@@ -1,5 +1,22 @@
 
 '''This module is used to generate WhiteSpace code.'''
+class Translator(object):
+    '''
+    This class can be used to translate code into WhiteSpace code
+    supported:
+    -integers, characters, strings
+    -addition, subtraction, multiplication, division, exponentiation
+    '''
+    def __init__(self, explain=True):
+        self.lang = WhiteSpace(explain) # whitespace functions
+        self.idx = 0 # Parse index
+        self.generated = False
+    def __str__(self):
+        '''how to print the whitespace code'''
+        return self.lang.string
+    def parse(self, string):
+        '''Translate a string of pythony code into whitespace'''
+
 class WhiteSpace(object):
     '''This class can be used to generate whitespace code'''
     def __init__(self, explain=True):
@@ -8,11 +25,11 @@ class WhiteSpace(object):
         self.labelidx = 0
         self.heapidx = 0
     def __str__(self):
-        '''how to print the object the whitespace code'''
+        '''how to print the whitespace code'''
         return self.string
     def __add__(self, other):
         '''join together two pieces of whitespace code'''
-        return self.string.replace("\n\n\n", "") + other.string
+        return self.string + other.string
     def number(self, num):
         '''
         add a number to the code
@@ -417,9 +434,5 @@ class WhiteSpace(object):
 
         self.label(self.labelidx-1)
 
-class Translator(WhiteSpace):
-    '''
-    This class can be used to translate basic python code into WhiteSpace code
-    '''
-    def __init__(self, explain=True):
-        WhiteSpace.__init__(self, explain)
+
+
