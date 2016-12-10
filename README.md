@@ -21,6 +21,6 @@ This runs the whitespace code using the interpreter:
 ## Future:
 I am still working on stuff. Recently, I added comparisons, basic loops, and other stuff. 
 
-It is kindo of messy right now, but I should be able to work on it more now that finals week is over.
+It is kind of messy right now, but I should be able to work on it more now that finals week is over.
 
 Hopefully someone else finds this amusing and wins some awards on HackerRank using whitespace.
