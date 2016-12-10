@@ -10,6 +10,10 @@ Everything is using python3, and I do not know if it will still work in other ve
 ## Usage:
 There is an example file that I use while I work on the object called test.py
 
+This will 'compile' the code in test.py into whitespace code:
+
+    python3 test.py
+
 ## Future:
 I am still working on stuff. Recently, I added comparisons, basic loops, and other stuff. 
 
