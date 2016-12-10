@@ -16,6 +16,7 @@ class Translator(object):
         return self.lang.string
     def parse(self, string):
         '''Translate a string of pythony code into whitespace'''
+        pass
 
 class WhiteSpace(object):
     '''This class can be used to generate whitespace code'''
