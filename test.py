@@ -6,7 +6,7 @@ import whitespac3 as w
 output = open("output.ws", 'w')
 output.truncate()
 
-s = w.Translator()
+s = w.WhiteSpace()
 start = s.label()
 x= s.store(None, 100)
 y= s.store(None, 100)
