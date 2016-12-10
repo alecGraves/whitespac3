@@ -25,4 +25,4 @@ output.write(s.string)
 output.close()
 
 
-os.system("python whitespace.py output.txt")
+os.system("python interpreter.py output.txt")
