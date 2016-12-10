@@ -14,7 +14,9 @@ This will 'compile' the code in test.py into whitespace code:
 
     python3 test.py
 
-This runs the whitespace code using the interpreter:
+I used system out to automatically run the generated whitespace code after it is 'compiled'
+
+This can be used to run whitespace code seperately:
 
     python3 interpreter.py output.ws
     
