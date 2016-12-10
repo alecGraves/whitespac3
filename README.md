@@ -16,7 +16,7 @@ This will 'compile' the code in test.py into whitespace code:
 
 This runs the whitespace code using the interpreter:
 
-    python3 whitespace.py output.ws
+    python3 interpreter.py output.ws
     
 ## Future:
 I am still working on stuff. Recently, I added comparisons, basic loops, and other stuff. 
