@@ -3,7 +3,7 @@ import os
 import whitespac3 as w
 #char to int use ord('c')
 #int to char use 
-output = open("output.txt", 'w')
+output = open("output.ws", 'w')
 output.truncate()
 
 s = w.Translator()
