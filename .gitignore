@@ -1,3 +1,8 @@
+# Whitespace files
+*.ws
+# Backup files
+*.bac
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
