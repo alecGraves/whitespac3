@@ -7,17 +7,11 @@ output = open("output.ws", 'w')
 output.truncate()
 
 s = w.WhiteSpace()
-start = s.label()
-x= s.store(None, 100)
-y= s.store(None, 100)
-s.compare(x, '<=', y)
 
-e=s.ifstate()
-s.printstr("True")
-s.jump(s.labelidx)
-s.endif(e)
-s.printstr("False")
-s.label()
+cond = s.store(None, 3)
+
+s.printstr("Hello!\n")
+s.stringin()
 s.exit()
 
 output.write(s.string)
@@ -25,4 +19,4 @@ output.write(s.string)
 output.close()
 
 
-os.system("python interpreter.py output.txt")
+os.system("python interpreter.py output.ws")

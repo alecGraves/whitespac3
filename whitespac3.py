@@ -2,7 +2,7 @@
 '''This module is used to generate WhiteSpace code.'''
 class Translator(object):
     '''
-    This class can be used to translate code into WhiteSpace code
+    This class can/will be used to translate code into WhiteSpace code
     supported:
     -integers, characters, strings
     -addition, subtraction, multiplication, division, exponentiation
@@ -99,8 +99,14 @@ class WhiteSpace(object):
         if self.explain:
             self.write("IMP:arithmetic")
         self.write("\t ")
-    def add(self):
-        '''add top of stack'''
+    def add(self, num=None):
+        '''
+        Add top of stack
+        Pass in a num if you want to add
+            that amount to the stack
+        '''
+        if num is not None:
+            self.push(num)
         self.arith()
         if self.explain:
             self.write("add")
@@ -285,10 +291,15 @@ class WhiteSpace(object):
         if self.explain:
             self.write("output_top_char")
         self.write("  ")
-    def printstr(self, string):
+    def printstr(self, string, memloc=None, lenloc=None):
         '''Print a string'''
-        for i in enumerate(string):
-            self.printchar(i[1])
+        if string is not None:
+            for i in enumerate(string):
+                self.printchar(i[1])
+            return 0
+        if memloc is not None and lenloc is not None:
+            pass #print string from memory
+
     def printnum(self):
         '''output and delete number at top of stack'''
         self.iocom()
@@ -301,38 +312,34 @@ class WhiteSpace(object):
         if self.explain:
             self.write("read_in_char")
         self.write("\t ")
-    def stringin(self):
-        '''Read in a string'''
+    def stringin(self, maxlength=100):
+        '''
+        Read in a string
+        TODO: add dynamic allocation method
+        requires storing idx info in the whitespace program
+        '''
         strlen_addr = self.store(None, 0)
-        string_addr = self.alloc(100)
-        linefeed = ord("\n")
-        condition_addr = self.store(None, 0)
+        string_addr = self.alloc(maxlength)
 
-        dostart, condition_addr = self.doloop(condition_addr)
-        self.store(condition_addr, 1)
-        self.push(string_addr)
-        self.retrieve(strlen_addr)
-        self.add()
+        label = self.label()
         self.charin()
+
+        #if (char != '\n'')
+        self.add(-1*ord("\n"))
+        end = self.ifstate()
+
+        #restore char and store it
+        self.add(ord("\n"))
+        self.store()
+
+        #incriment string length
         self.retrieve(strlen_addr)
-        self.push(1)
-        self.add()
+        self.add(1)
         self.store(strlen_addr)
 
-        self.push(string_addr)
-        self.retrieve(strlen_addr)
-        self.add()
-        self.retrieve()
-        self.dupl()
-        self.printnum()
-        self.push(linefeed)
-        self.sub()
-
-        self.jumpzer(self.labelidx)
-        self.store(condition_addr, 0)
-        self.label()
-
-        self.enddoloop(dostart, condition_addr)
+        #repeat
+        self.jump(label)
+        self.endif(end)
 
         return strlen_addr, string_addr
     def numin(self):
@@ -346,14 +353,16 @@ class WhiteSpace(object):
     def doloop(self, conditionloc):
         '''
         start a do loop.
-        Continues until value in conditionloc is nonzero.
+        Continues until value in conditionloc is zero.
         '''
         label = self.label()
         return label, conditionloc
     def enddoloop(self, label, conditionloc):
         '''end a do loop'''
         self.retrieve(conditionloc)
-        self.jumpzer(label)
+        eif = self.ifstate()
+        self.jump(label)
+        self.endif(eif)
 
     def loop(self, repetitions):
         '''
@@ -434,6 +443,3 @@ class WhiteSpace(object):
         self.push(0)
 
         self.label(self.labelidx-1)
-
-
-
