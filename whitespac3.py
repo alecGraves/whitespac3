@@ -1,30 +1,10 @@
-
-'''This module is used to generate WhiteSpace code.'''
-class Translator(object):
-    '''
-    This class can/will be used to translate code into WhiteSpace code
-    supported:
-    -integers, characters, strings
-    -addition, subtraction, multiplication, division, exponentiation
-    '''
-    def __init__(self, explain=True):
-        self.lang = WhiteSpace(explain) # whitespace functions
-        self.idx = 0 # Parse index
-        self.generated = False
-    def __str__(self):
-        '''how to print the whitespace code'''
-        return self.lang.string
-    def parse(self, string):
-        '''Translate a string of pythony code into whitespace'''
-        pass
-
 class WhiteSpace(object):
     '''This class can be used to generate whitespace code'''
     def __init__(self, explain=True):
         self.string = ""
         self.explain = explain
-        self.labelidx = 0
-        self.heapidx = 0
+        self.labelidx = 1
+        self.store(0,1)# initialize heapidx
     def __str__(self):
         '''how to print the whitespace code'''
         return self.string
@@ -76,7 +56,7 @@ class WhiteSpace(object):
             self.write("dupliate_top")
         self.write("\n ")
     def swap(self):
-        '''swap the top swo items in the stack'''
+        '''swap the top two items in the stack'''
         self.stack_manip()
         if self.explain:
             self.write("swap_top_two")
@@ -101,9 +81,10 @@ class WhiteSpace(object):
         self.write("\t ")
     def add(self, num=None):
         '''
-        Add top of stack
+        Add top of stack.
         Pass in a num if you want to add
-            that amount to the stack
+            that amount to the top of 
+            the stack.
         '''
         if num is not None:
             self.push(num)
@@ -146,6 +127,23 @@ class WhiteSpace(object):
         self.write("\t\t")
 
 # Heap access commands:
+    def heapidx(self, n=1, leave=True):
+        '''
+        keeps track of current location in heap
+        number stored in heap[0].
+
+        Inputs:
+        incriments heap[0] by n
+
+        If leave:
+            leave previous heapidx at the top of the stack
+        '''
+        self.retrieve(0)
+        if leave:
+            self.dupl()
+        self.add(n)
+        self.store(0)
+
     def heap(self):
         '''
         IMP: Heap Access
@@ -163,27 +161,25 @@ class WhiteSpace(object):
         '''
         Push an address then a val and run this command to store it,
             or use the arguements.
-        Returns address if used
+        Returns address if used.
+
         Note: if you use the arguments (None, Val),
-            val will be stored at the heapidx (starts at 1k)
-        More intelligent memory management may be added in the future.
+            val will be stored at the current heapidx
         '''
         if addr is not None and val is not None:
             self.push(addr)
             self.push(val)
-        elif addr is None and val is not None:
-            addr = self.heapidx
-            self.push(addr)
+        elif addr is None and val is not None: # get new address
+            self.heapidx(1)
+            self.dupl()
             self.push(val)
-            self.heapidx += 1
         elif addr is not None and val is None:
             self.push(addr)
             self.swap()
-        else:
-            addr = self.heapidx
-            self.push(addr)
-            self.swap()
-            self.heapidx += 1
+        # else: #Both are none
+        #     self.retrieve(0)
+        #     self.swap()
+        #     self.heapidx(1)
         self.heap()
         if self.explain:
             self.write("store")
@@ -201,11 +197,7 @@ class WhiteSpace(object):
         if self.explain:
             self.write("retrieve")
         self.write("\t")
-    def alloc(self, length):
-        '''Allocate a length of memory from the heap'''
-        self.heapidx += length
-        location = self.heapidx - length
-        return location
+
 
 # Flow Control
     def flow(self):
@@ -283,6 +275,12 @@ class WhiteSpace(object):
         if self.explain:
             self.write("IMP:I/O")
         self.write("\t\n")
+    def printnum(self):
+        '''output and delete number at top of stack'''
+        self.iocom()
+        if self.explain:
+            self.write("oututput_top_num")
+        self.write(" \t")
     def printchar(self, char=None):
         '''output and delete character at top of stack'''
         if char is not None:
@@ -291,57 +289,71 @@ class WhiteSpace(object):
         if self.explain:
             self.write("output_top_char")
         self.write("  ")
-    def printstr(self, string, memloc=None, lenloc=None):
-        '''Print a string'''
+    def printstr(self, string=None):
+        '''
+        Pass in a string to print it in the program
+
+        If string not passed in, prints string from
+            memory address at top of stack.
+        '''
         if string is not None:
             for i in enumerate(string):
                 self.printchar(i[1])
-            return 0
-        if memloc is not None and lenloc is not None:
-            pass #print string from memory
+        else: pass#print string from memory
+            # self.new_num(1)
+            # loop_label = self.label()
+            # self.swap()
+            # self.dupl()
+            # self.add()
 
-    def printnum(self):
-        '''output and delete number at top of stack'''
-        self.iocom()
-        if self.explain:
-            self.write("oututput_top_num")
-        self.write(" \t")
+            # # Incriment
+            # self.dupl()
+            # self.dupl()
+            # self.retrieve()
+            # self.add(1)
+            # self.store()
+            # self.jump(loop_label)
+            # self.endloop(loop_label)
     def charin(self):
-        '''read in a character'''
+        '''read in a character, leave it at top of stack'''
         self.iocom()
         if self.explain:
             self.write("read_in_char")
         self.write("\t ")
-    def stringin(self, maxlength=100):
+    def stringin(self, endchar='\n'):
         '''
-        Read in a string
-        TODO: add dynamic allocation method
-        requires storing idx info in the whitespace program
+        Read in a string, leave addr in stack
+
+        String[0]=len(String)-1
         '''
-        strlen_addr = self.store(None, 0)
-        string_addr = self.alloc(maxlength)
-
-        label = self.label()
-        self.charin()
-
-        #if (char != '\n'')
-        self.add(-1*ord("\n"))
-        end = self.ifstate()
-
-        #restore char and store it
-        self.add(ord("\n"))
+        self.heapidx(1)
+        self.dupl() #duplicate string start address
+        self.push(0)
         self.store()
 
+        label = self.label()
+
+        self.heapidx(1)# get new memory address for character
+        self.dupl()
+        self.charin()# save the character in the memory address
+        self.retrieve()# get the new character
+
+        #if (char != '\n'')
+        self.add(-1*ord(endchar))#subtract endchar
+        end = self.ifstate()
+
         #incriment string length
-        self.retrieve(strlen_addr)
-        self.add(1)
-        self.store(strlen_addr)
+        self.dupl()#duplicate string start address
+        self.dupl()
+        self.retrieve() #retrieve length of string (first member of the string)
+        self.add(1) #incriment
+        self.store()
 
         #repeat
         self.jump(label)
         self.endif(end)
+        self.heapidx(-1, False)# 'deallocate' the endchar
 
-        return strlen_addr, string_addr
     def numin(self):
         '''read in a number'''
         self.iocom()
@@ -350,37 +362,26 @@ class WhiteSpace(object):
         self.write("\t\t")
 
 #Loops
-    def doloop(self, conditionloc):
+    def loop(self):
         '''
-        start a do loop.
-        Continues until value in conditionloc is zero.
-        '''
-        label = self.label()
-        return label, conditionloc
-    def enddoloop(self, label, conditionloc):
-        '''end a do loop'''
-        self.retrieve(conditionloc)
-        eif = self.ifstate()
-        self.jump(label)
-        self.endif(eif)
+        Starts a while loop.
 
-    def loop(self, repetitions):
+        Push a condition address to the stack then run this.
+
+        Continues until value in condition address value is zero.
         '''
-        Starts a generic loop, returns args for endloop()
-        Args: number of repetitions
-        Returns: loop_label, iterator_location
-        '''
-        iterator = self.store(None, -1*repetitions)
-        label = self.label()
-        return label, iterator
-    def endloop(self, label, iterator):
-        '''Ends a generic loop loop'''
-        self.retrieve(iterator)
-        self.push(1)
-        self.add()
+        start_label = self.label()
+        self.labelidx += 1
         self.dupl()
-        self.store(iterator)
-        self.jumpneg(label)
+        self.retrieve()
+        self.jumpzer(start_label+1)
+        return start_label
+
+    def endloop(self, start_label):
+        '''Ends a while loop'''
+        self.jump(start_label)
+        self.label(start_label+1)
+
 # Logic
     def ifstate(self):
         """
@@ -397,17 +398,29 @@ class WhiteSpace(object):
         '''easily end if statement'''
         self.label(end_label)
 
-    def compare(self, var1_address, comparison, var2_address):
+    def compare(self, comparison="=="):
         """
-        first arg is on left.
-        defaults to vars are equal
-        '>' for greater, '<' for lessthan
+        Inputs: Eats the top 2 in the stack.
+
+        comparison: defaults to vars are equal.
+        options: "==", '>' , '<', '>=' or '<='
+
+        Outputs:
+
+        var1 'comparison' var2
+
         pushes 0 to top of stack if false,
         pushes 1 if true
+
+        example usage:
+
+        push(var1)
+
+        push(var2)
+
+        compare(">=") # var1 >= Var2?
         """
         self.labelidx += 3
-        self.retrieve(var1_address)
-        self.retrieve(var2_address)
         if comparison == '=' or comparison == '==':
             self.sub()
             self.jumpzer(self.labelidx-3)
@@ -443,3 +456,18 @@ class WhiteSpace(object):
         self.push(0)
 
         self.label(self.labelidx-1)
+
+# Special
+    def add_address(self, n):
+        '''incriments/decriments value in address at top of stack'''
+        self.dupl()
+        self.dupl()
+        self.retrieve()
+        self.add(n)
+        self.store()
+    def new_num(self, initializer=0):
+        '''adds a number to the heap. leaves the address in the stack.'''
+        self.heapidx(1)
+        self.dupl()
+        self.push(initializer)
+        self.store()

@@ -8,15 +8,23 @@ output.truncate()
 
 s = w.WhiteSpace()
 
-cond = s.store(None, 3)
+s.store(None, 3)
 
+label = s.loop()
 s.printstr("Hello!\n")
-s.stringin()
+
+#decriment
+s.add_address(-1)
+
+s.endloop(label)
+
+# s.stringin()
 s.exit()
 
 output.write(s.string)
 
 output.close()
 
-
 os.system("python interpreter.py output.ws")
+
+# os.system("python interpreter.py --verbose output.ws")
